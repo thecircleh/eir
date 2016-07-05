@@ -60,15 +60,17 @@ void setup() {
   Serial.print("Zero factor: "); //This can be used to remove the need to tare the scale. Useful in permanent scale projects.
   Serial.println(zero_factor);
   Serial.println("Enter the weight in pounds");
-  float target_weight = Serial.read();
+  if(Serial.available()){float target_weight=Serial.read();}
 }
 
 void loop() {
 
-while(target_weight != 0){
+while(target_weight > 0){
+Serial.print("Calibratimg with target weight of ");
+Serial.println(target_weight);
 scale.set_scale(calibration_factor); //Adjust to this calibration factor
-float a = (scale.get_units() - target_weight)
-a = abs(a)
+float a = (scale.get_units() - target_weight);
+a = abs(a);
 if(a <= 1 && a >= 0 ) {
 Serial.println("Target Weight Reached with Calibration Value of ");
 Serial.print(calibration_factor);
@@ -81,3 +83,4 @@ Serial.print(".");
 }
 } 
 }
+
