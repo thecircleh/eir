@@ -5,7 +5,6 @@
  Date:  July 5th, 2016
  License:  Public Domain
  
-
  This is the calibration sketch. Use it to determine the calibration_factor that the main example uses. It also
  outputs the zero_factor useful for projects that have a permanent mass on the scale in between power cycles.
  
@@ -39,8 +38,9 @@
 
 HX711 scale(DOUT, CLK);
 
-float calibration_factor = -10000; //Go as low as you'd like to start 
-float target_weight = 0; //This is the known weight we are trying to get to
+float calibration_factor = -100000; //Go as low as you'd like to start 
+int target_weight = 0; //This is the known weight we are trying to get to
+
 
 void setup() {
   Serial.begin(9600);
@@ -60,27 +60,31 @@ void setup() {
   Serial.print("Zero factor: "); //This can be used to remove the need to tare the scale. Useful in permanent scale projects.
   Serial.println(zero_factor);
   Serial.println("Enter the weight in pounds");
-  if(Serial.available()){float target_weight=Serial.read();}
 }
 
 void loop() {
 
-while(target_weight > 0){
+if(Serial.available())
+  {target_weight = Serial.parseInt();
 Serial.print("Calibratimg with target weight of ");
-Serial.println(target_weight);
+Serial.println(target_weight);  
+  }
+while(target_weight > 0){
 scale.set_scale(calibration_factor); //Adjust to this calibration factor
 float a = (scale.get_units() - target_weight);
 a = abs(a);
 if(a <= 1 && a >= 0 ) {
-Serial.println("Target Weight Reached with Calibration Value of ");
-Serial.print(calibration_factor);
-float target_weight = 0;
+Serial.print("Target Weight Reached with Calibration Value of ");
+Serial.println(calibration_factor);
+int target_weight = 0;
 }
 else
 {
-calibration_factor += 5;
-Serial.print("."); 
+calibration_factor += 1;
+Serial.print(scale.get_units() - target_weight);
+Serial.print(":");
+Serial.println(calibration_factor);
+delay(500);
 }
 } 
 }
-
