@@ -28,40 +28,59 @@
 
 #define DOUT  3
 #define CLK  2
-int TEMPCOUNT  = 1  ;  
-float TENTEMP[10]; 
-int TENTEMPAVERAGE = 0;
-long TENTEMPTOTAL = 0;
+int HEIGHTCOUNT  = 1  ;  
+float TENHEIGHT[10]; 
+float TENHEIGHTAVERAGE = 0.00;
+float TENHEIGHTTOTAL = 0.0;
+float LASTHEIGHT = 2;
 HX711 scale(DOUT, CLK);
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("HX711 scale demo");
+  Serial.println("MEASURE by Eir DEMO");
 
   scale.set_scale(calibration_factor); //This value is obtained by using the SparkFun_HX711_Calibration sketch
   scale.tare();	//Assuming there is no weight on the scale at start up, reset the scale to 0
 
-  Serial.println("Readings:");
+  Serial.println("Weight Readings:");
 }
 
 void loop() {
- int var = 0;
+float b = scale.get_units() + 1; 
+if (b < 2 && b != 1) scale.tare(); 
+int c = b/LASTHEIGHT;
+if (b < 2 && c < .1) {
+  Serial.println("Scale Is Not Loaded"); 
+  delay(2000);
+}
+else
+{
+  
+Serial.println("CALCULATING WEIGHT"); 
+int var = 0;
 while(var < 10){
-  TENTEMP[var] = scale.get_units();
+  TENHEIGHT[var] = scale.get_units();
   delay(500) ;
   var++;
 }
  
   for(int i = 0 ; i < 10 ; i++){
-  TENTEMPTOTAL = TENTEMPTOTAL+TENTEMP[i] ;
+  TENHEIGHTTOTAL = TENHEIGHTTOTAL+TENHEIGHT[i] ;
   }
-TENTEMPAVERAGE = TENTEMPTOTAL / 10 ; 
+TENHEIGHTAVERAGE = TENHEIGHTTOTAL / 10 ; 
   
  // Serial.print("The Average Weight Is: ");
  // Serial.print(scale.get_units(), 1); //scale.get_units() returns a float
-  Serial.print(TENTEMPAVERAGE);
+ float check = TENHEIGHTAVERAGE + 2 - LASTHEIGHT;
+ if (check < .5) {
+   Serial.print(TENHEIGHTAVERAGE);
   Serial.print(" lbs"); //You can change this to kg but you'll need to refactor the calibration_factor
   Serial.println();
-  TENTEMPTOTAL = 0;
+  Serial.println("PLEASE STEP OFF SCALE"); 
+  delay(30000); 
+ }
+  LASTHEIGHT = TENHEIGHTAVERAGE + 2;
+  TENHEIGHTTOTAL = 0;
   delay(1000); 
+}
 }
